@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description:
+  Allows receiving emails through AWS SES receive email service, delivering it to lambda through SNS so that a single 
+  inbox can receive multiple emails, using SES "Email receiving" unique email addresses.
+
+Parameters:
+  Recipient:
+    Type: String
+    Description: The email address that will receive all SES emails.
+Mappings: {}
+Conditions: {}
+Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties: {}
+
+  MailLambdaSubscription:
+    Type: AWS::SNS::Subscription
+    DependsOn: MailFunction
+    Properties:
+      Endpoint: !GetAtt MailFunction.Arn
+      Protocol: lambda
+      TopicArn:
+        Ref: SNSTopic
+
+  MailFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          email: !Ref Recipient
+      MemorySize: 128
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code: source
+      Handler: index.handler
+      Runtime: nodejs14.x
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: SESSendEmail
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ses:SendEmail"
+                  - "ses:SendRawEmail"
+                Resource: "*"
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn:
+        Ref: SNSTopic
+      FunctionName: !GetAtt MailFunction.Arn

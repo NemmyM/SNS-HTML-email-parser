@@ -1,0 +1,17 @@
+{
+  "name": "parseSnsEmailLambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "locally": "node -e \"console.log(require('./index').handler(require('./event.json')));\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.58.0",
+    "mailparser": "^3.4.0"
+  }
+}
