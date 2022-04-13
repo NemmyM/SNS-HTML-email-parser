@@ -10,7 +10,7 @@ set OUTPUT_TEMPLATE=packaged-template.yaml
 
 :: install NodeJS project dependecies:
 cd source
-npm install
+call npm install
 cd ..
 
 :: Package and produce an output template
