@@ -13,7 +13,6 @@ exports.handler = async (event) => {
     const message = JSON.parse(event.Records[0].Sns.Message);
     const source = process.env.email;
     const destination = message.mail.destination[0];
-    // console.log(destination); return;
     let body = Buffer.from(message.content, 'base64');
     const mail = await simpleParser(body);
 
@@ -27,11 +26,11 @@ exports.handler = async (event) => {
             Body: {
                 Html: {
                     Charset: "UTF-8",
-                    Data: mail.html
+                    Data: mail.html ?? ""
                 },
                 Text: {
                     Charset: "UTF-8",
-                    Data: mail.text
+                    Data: mail.text ?? ""
                 },
             },
             Subject: {
